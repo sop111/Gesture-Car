@@ -1,0 +1,137 @@
+//Arduino Code:
+//".ino" format
+const int groundpin = A0;
+const int powerpin = A4;
+const int USP = 11;
+//XYZ Axis
+const int xpin = A3;
+const int ypin = A2;
+const int zpin = A5;
+//Connections to motors
+int M11 = 2;
+int M12 = 3;
+int M21 = 4;
+int M22 = 5;
+int trig = 12;
+int echo = 13;
+int x = 0;
+int y = 0;
+int z = 0;
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(USP, OUTPUT);
+  pinMode(groundpin, OUTPUT);
+  pinMode(powerpin, OUTPUT);
+  digitalWrite(groundpin, LOW);
+  digitalWrite(powerpin, HIGH);
+  digitalWrite(USP, HIGH);
+  pinMode(trig, OUTPUT); //trig
+  pinMode(echo, INPUT);
+  pinMode(M11, OUTPUT);
+  pinMode(M12, OUTPUT);
+  pinMode(M21, OUTPUT);
+  pinMode(M22, OUTPUT);
+  digitalWrite(M12, LOW);
+  digitalWrite(M22, LOW);
+  digitalWrite(M11, LOW);
+  digitalWrite(M21, LOW);
+
+}
+
+void loop()
+{
+//Accelerometer
+  Serial.print(analogRead(xpin));
+  Serial.print("\t");
+  Serial.print(analogRead(ypin));
+  Serial.print("\t");
+  Serial.print(analogRead(zpin));
+  Serial.println();
+  x = analogRead(xpin);
+  y = analogRead(ypin);
+  z = analogRead(zpin);
+//Ultrasonic Sensor
+  long duration, distance;
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  duration = pulseIn(echo, HIGH);
+  distance = (duration / 2) / 58;
+  Serial.print("Distance    ");
+  Serial.println(distance);
+//Functioning
+
+  if (distance <= 3)
+  {
+    Serial.println("STOP!");
+    digitalWrite(M12, LOW);
+    digitalWrite(M22, LOW);
+    digitalWrite(M11, LOW);
+    digitalWrite(M21, LOW);
+    delay(150);
+    //CODE to take reverse and make a turn:
+    /*        digitalWrite(M12,HIGH);
+        digitalWrite(M22,HIGH);
+        digitalWrite(M11,LOW);
+        digitalWrite(M21,LOW);
+        delay(1000);
+
+            Serial.println("Right");
+        digitalWrite(M12,LOW);
+        digitalWrite(M22,LOW);
+        digitalWrite(M11,HIGH);
+        digitalWrite(M21,LOW);
+        delay(1300);
+            digitalWrite(M12,LOW);
+        digitalWrite(M22,LOW);
+        digitalWrite(M11,LOW);
+        digitalWrite(M21,LOW);
+        */
+  }
+  else if ( x < 320 ) //Forward 
+  {
+    Serial.println("Forward");
+    digitalWrite(M11, HIGH);
+    digitalWrite(M21, HIGH);
+    digitalWrite(M12, LOW);
+    digitalWrite(M22, LOW);
+  }
+  else if (x > 380 ) //Reverse
+  {
+    Serial.println("Reverse");
+    digitalWrite(M12, HIGH);
+    digitalWrite(M22, HIGH);
+    digitalWrite(M11, LOW);
+    digitalWrite(M21, LOW);
+  }
+  else if (y > 370 ) //Right
+  {
+
+    Serial.println("Right");
+    digitalWrite(M12, LOW);
+    digitalWrite(M22, LOW);
+    digitalWrite(M11, HIGH);
+    digitalWrite(M21, LOW);
+  }
+  else if (y < 330 ) //Left
+  {
+    Serial.println("Left");
+    digitalWrite(M12, LOW);
+    digitalWrite(M22, LOW);
+    digitalWrite(M11, LOW);
+    digitalWrite(M21, HIGH);
+  }
+  else //All motors turned off
+  {
+    Serial.pintln("PAUSED");
+    digitalWrite(M12, LOW);
+    digitalWrite(M22, LOW);
+    digitalWrite(M11, LOW);
+    digitalWrite(M21, LOW);
+  }
+  delay(20);
+}
